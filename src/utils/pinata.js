@@ -1,11 +1,13 @@
 import axios from 'axios';
 import FormData from 'form-data';
-import {char2Bytes} from "@taquito/utils"
+import { TezosMessageUtils } from './TezosMessageUtil';
+// import {char2Bytes} from "@taquito/utils"
 
 // TODO - 8 create a function sendFileToIPFS and send a POST request to
 // pinata api using you api key to get the cid of the image blob
 var bigInt = require("big-integer");
 
+const writePackedData = TezosMessageUtils.writePackedData
 
 export const sendFileToIPFS = async (ImageBlob) => {
 
@@ -82,34 +84,6 @@ const jsonToPinata = async (json) =>  {
 
 }
 
-// from https://github.com/Cryptonomic/ConseilJS/blob/master/src/chain/tezos/TezosMessageUtil.ts
-export const writeInt = (value) => {
-    if (value < 0) { throw new Error('Use writeSignedInt to encode negative numbers'); }
-    //@ts-ignore
-    return Buffer.from(Buffer.from(twoByteHex(value), 'hex').map((v, i) => { return i === 0 ? v : v ^ 0x80; }).reverse()).toString('hex');
-}
-
-function twoByteHex(n) {
-    if (n < 128) { return ('0' + n.toString(16)).slice(-2); }
-
-    let h = '';
-    if (n > 2147483648) {
-        let r = bigInt(n);
-        while (r.greater(0)) {
-            h = ('0' + (r.and(127)).toString(16)).slice(-2) + h;
-            r = r.shiftRight(7);
-        }
-    } else {
-        let r = n;
-        while (r > 0) {
-            h = ('0' + (r & 127).toString(16)).slice(-2) + h;
-            r = r >> 7;
-        }
-    }
-
-    return h;
-}
-
 
 // TODO 10.1 - create a pinataWrapper function to convert the name , event name and image
 // into metadata of a Tezos NFT and pin it to pinata to return the ipfs cid 
@@ -117,25 +91,27 @@ export const pinataWrapper = async (formData, image) =>  {
 
     try {
         let data = {};
-        data.name = char2Bytes("LotNFT");
-        data.description = char2Bytes("This NFT corresponds to your ownership of a Lot!");
-        data.artifactUri = char2Bytes(image);
-        data.displayUri = char2Bytes(image);
-        data.thumbnailUri = char2Bytes(image);
-        data.image_url = char2Bytes(image);
-        data.decimals = char2Bytes("0");
+        data.name = writePackedData("LotNFT", "string");
+        data.description = writePackedData("This NFT corresponds to your ownership of a Lot!", "string");
+        data.artifactUri = writePackedData(image, "string");
+        data.displayUri = writePackedData(image, "string");
+        data.thumbnailUri = writePackedData(image, "string");
+        data.image_url = writePackedData(image, "string");
+        data.decimals = writePackedData("0", "string");
 
-        data.lot_id = writeInt(parseInt(formData['lot_id']));
-        data.description = char2Bytes(formData['description']);
-        data.image_url = char2Bytes(image);
-        data.owner_title = formData['owner_title'];
-        data.units = writeInt(parseInt(formData['units']));
+        data.lot_id = writePackedData(parseInt(formData['lot_id']), "nat");
+        data.description = writePackedData(formData['description'], "string");
+        data.image_url = writePackedData(image, "string");
+        data.owner_title = writePackedData(formData['owner_title'], "string");
+        data.units = writePackedData(parseInt(formData['units']), "nat");
         
-        data.symbol = char2Bytes("LNFT");
-        data.rights =  char2Bytes("All rights reserved.");
+        data.symbol = writePackedData("LNFT", "string");
+        data.rights =  writePackedData("All rights reserved.", "string");
 
-        const res = await jsonToPinata(data);
-
+        // const res = await jsonToPinata(data);
+        Object.keys(data).forEach(function(key, _) {
+            data[key] = data[key];
+          });
         return data;
 
     } catch (error) {

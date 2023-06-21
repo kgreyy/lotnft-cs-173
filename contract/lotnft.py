@@ -12,7 +12,7 @@ def make_metadata(name, lot_id, image_url, owner_title, units, desc):
             "decimals": sp.utils.bytes_of_string("1"),
             "description": sp.utils.bytes_of_string(desc),
             "lot_id": sp.pack(lot_id),
-            "image_url": sp.utils.bytes_of_string("ipfs://example"),
+            "image_url": sp.utils.bytes_of_string("ipfs://QmThjvKKCJp5N3DbUus7nfgr7mxKSmVacbGsBLfW8ag3AJ"),
             "owner_title": sp.utils.bytes_of_string(owner_title),
             "units": sp.pack(units)
         }
@@ -21,10 +21,10 @@ def make_metadata(name, lot_id, image_url, owner_title, units, desc):
 administrator = sp.address("tz1SHC1xaNZsZ19K4nJYoLutQYt5J3qJhUBc")
 alice = sp.test_account("Alice")
 bob = sp.test_account("Bob")
-tok0_md = make_metadata(name="Token Zero", lot_id=0, image_url="ipfs://sana", owner_title="One", desc="one", units=100)
-tok1_md = make_metadata(name="Token One", lot_id=1, image_url="ipfs://sana", owner_title="Two", desc="two", units=50)
-tok2_md = make_metadata(name="Token Two", lot_id=2, image_url="ipfs://sana", owner_title="Three", desc="three", units=100)
-tok3_md = make_metadata(name="Token Three", lot_id=1, image_url="ipfs://sana", owner_title="Four", desc="four", units=50)
+tok0_md = make_metadata(name="Token Zero", lot_id=0, image_url="ipfs://sana", owner_title="One", desc="one", units=24)
+tok1_md = make_metadata(name="Token One", lot_id=1, image_url="ipfs://sana", owner_title="Two", desc="two", units=12)
+tok2_md = make_metadata(name="Token Two", lot_id=2, image_url="ipfs://sana", owner_title="Three", desc="three", units=24)
+tok3_md = make_metadata(name="Token Three", lot_id=1, image_url="ipfs://sana", owner_title="Four", desc="four", units=12)
 TOKEN_METADATA = [tok0_md, tok1_md, tok2_md, tok3_md]
 METADATA = sp.utils.metadata_of_url("")
 
@@ -84,7 +84,8 @@ def m():
                 (x_coord, y_coord) = sp.ediv(lot_id, self.data.max_rows).unwrap_some(error="Division by 0")
                 assert sp.cast(x_coord, sp.nat) < self.data.max_rows, "Over the x-coord limit"
                 assert sp.cast(y_coord, sp.nat) < self.data.max_columns, "Over the y-coord limit"
-                units = sp.unpack(action.metadata['units'], sp.nat).unwrap_some()
+
+                units = sp.unpack(action.metadata['units'], sp.nat).unwrap_some(error="Failing on units")
                 assert self.data.lot_claims.get(sp.unpack(action.metadata['lot_id'], sp.nat).unwrap_some(), default=self.data.time_unit_per_lot) > sp.nat(0), "Lot already fully claimed"
                 assert self.data.lot_claims.get(sp.unpack(action.metadata['lot_id'], sp.nat).unwrap_some(), default=self.data.time_unit_per_lot) >= units, "Too many units being reserved"
                 
@@ -177,8 +178,8 @@ def tester():
         metadata=sp.utils.metadata_of_url(""),
         ledger={},
         token_metadata=[],
-        max_cols=sp.nat(5), max_rows=sp.nat(3),
-        time_unit_per_lot=sp.nat(100)
+        max_cols=sp.nat(10), max_rows=sp.nat(10),
+        time_unit_per_lot=sp.nat(24)
     )
     
     sc.h2("Accounts")

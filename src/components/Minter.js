@@ -22,7 +22,7 @@ const getImageIPFS = async (imageDataUrl) => {
 
 // TODO 11 - get complate metadata of NFT ready for minting
 const getMintingMetadata = async (formData, imageDataUrl) => {
-    const imageIPFS = getImageIPFS(imageDataUrl)
+    const imageIPFS = await getImageIPFS(imageDataUrl)
     try {
         const res = await pinataWrapper(formData, imageIPFS)
         return res;

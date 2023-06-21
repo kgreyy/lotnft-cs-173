@@ -17,6 +17,7 @@ const getMetadata = async (url) => {
 export const mintOperation = async (data) => {
   try {
     const contractInstance = await tezos.wallet.at(contract_address);
+    console.log(MichelsonMap.fromLiteral(data));
     const op = await contractInstance.methods.mint([{metadata: MichelsonMap.fromLiteral(data),
                                                     to_: await getAccount()}]).send();
     await op.confirmation(1);
