@@ -36,5 +36,5 @@ const getMintingMetadata = async (formData, imageDataUrl) => {
 // TODO 12 - call the minting operation with the created metadata of the NFT
 export const mintingOperation = async (formData, imageDataUrl) => {
     const data = await getMintingMetadata(formData, imageDataUrl);
-    await mintOperation(data)
+    await mintOperation(data);
 };

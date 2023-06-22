@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { getOwnedTokens, burnToken } from './api';
+import { getTokenList, burnToken, processToken, getImage } from './api';
 import { Link } from 'react-router-dom';
-import { getTokenList } from './api';
-import axios from 'axios';
+import {  } from './api';
 import './Homepage.css';
 import { connectWallet, getAccount } from "../utils/wallet";
 import { mintingOperation } from "../components/Minter"
@@ -180,7 +179,9 @@ const TransferPopup = ({ onClose }) => {
     // Call your API function to fetch the token list
     getTokenList()
       .then((response) => {
-        setOwnedTokens(response.data);
+        const laman = processToken(response.data)
+        console.log(laman);
+        setOwnedTokens(laman);
       })
       .catch((error) => {
         console.log('Error fetching owned tokens:', error);
@@ -219,9 +220,9 @@ const TransferPopup = ({ onClose }) => {
             </thead>
             <tbody>
               {ownedTokens.map((token) => (
-                <tr key={token.tokenID}>
-                  <td>{token.tokenID}</td>
-                  <td>{token.metadata}</td>
+                <tr key={token.token_id}>
+                  <td>{token.token_id}</td>
+                  <td>{JSON.stringify(token.token_info) }</td>
                 </tr>
               ))}
             </tbody>
@@ -277,9 +278,11 @@ const BurnPopup = ({ onClose }) => {
   }, []);
 
   const fetchOwnedTokens = () => {
-    getOwnedTokens()
+    getTokenList()
       .then((response) => {
-        setOwnedTokens(response.data);
+        const laman = processToken(response.data)
+        console.log(laman);
+        setOwnedTokens(laman);
       })
       .catch((error) => {
         console.log('Error fetching owned tokens:', error);
@@ -320,9 +323,9 @@ const BurnPopup = ({ onClose }) => {
               </thead>
               <tbody>
                 {ownedTokens.map((token) => (
-                  <tr key={token.tokenID}>
-                    <td>{token.tokenID}</td>
-                    <td>{token.metadata}</td>
+                  <tr key={token.token_id}>
+                    <td>{token.token_id}</td>
+                    <td>{JSON.stringify(token.token_info) }</td>
                   </tr>
                 ))}
               </tbody>
@@ -360,12 +363,27 @@ const Homepage = () => {
   const [isMintPopupOpen, setIsMintPopupOpen] = useState(false);
   const [isTransferPopupOpen, setTransferPopupOpen] = useState(false);
   const [isBurnPopupOpen, setIsBurnPopupOpen] = useState(false);
+  const [ownedTokens, setOwnedTokens] = useState([]);
 
   const [data, setData] = useState(null);
   const [account, setAccount] = useState(null);
+  
+  const fetchOwnedTokens = () => {
+    // Call your API function to fetch the token list
+    getTokenList()
+      .then((response) => {
+        const laman = processToken(response.data)
+        console.log(laman);
+        setOwnedTokens(laman);
+      })
+      .catch((error) => {
+        console.log('Error fetching owned tokens:', error);
+      });
+  };
 
   useEffect(() => {
     (async () => {
+      await fetchOwnedTokens();
       const account = await getAccount();
       setAccount(account);
     })();
@@ -519,12 +537,12 @@ const Homepage = () => {
       </div>
 
       <div className="land-lots-container">
-        {landLots.map((landLot) => (
-          <div className="land-lot-wrapper" key={landLot.id}>
+        {ownedTokens.map((landLot) => (
+          <div className="land-lot-wrapper" key={landLot.token_id}>
             <div className="land-lot-image-crop">
               <img
-                src={landLot.image}
-                alt={`Land Lot ${landLot.id}`}
+                src={getImage(landLot.token_info.image_url)}
+                alt={`Land Lot ${landLot.token_id}`}
                 className="land-lot-image"
               />
             </div>
