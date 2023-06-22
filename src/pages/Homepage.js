@@ -361,6 +361,16 @@ const Homepage = () => {
   const [isTransferPopupOpen, setTransferPopupOpen] = useState(false);
   const [isBurnPopupOpen, setIsBurnPopupOpen] = useState(false);
 
+  const [data, setData] = useState(null);
+  const [account, setAccount] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      const account = await getAccount();
+      setAccount(account);
+    })();
+  }, []);
+
   const handleMintPopupToggle = () => {
     setIsMintPopupOpen(!isMintPopupOpen);
   };
@@ -372,10 +382,7 @@ const Homepage = () => {
   const handleBurnPopupToggle = () => {
     setIsBurnPopupOpen(!isBurnPopupOpen);
   };
-
-  const [data, setData] = useState(null);
-  const [account, setAccount] = useState(null);
-
+  
   const onConnectWallet = async () => {
     await connectWallet();
     const account = await getAccount();
@@ -504,13 +511,11 @@ const Homepage = () => {
         <button className="menu-link" onClick={handleBurnPopupToggle}>
           Burn
         </button>
-        </div>
+        
+      </div>
 
-      <div className="container py-4">
-        <h1 class="project-title"></h1>
-          <button  onClick={onConnectWallet} className="btn btn-outline-info" >
-            { account ? account : "CONNECT WALLET"}
-          </button>
+      <div className="tab-bar">
+      <h1 className="tab-title" style={{ fontFamily: 'Montserrat' }}>LOTNFT</h1>
       </div>
 
       <div className="land-lots-container">
