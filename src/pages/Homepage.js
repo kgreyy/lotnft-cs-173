@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getTokenList, burnToken, processToken, getImage } from './api';
+import { getTokenList, burnToken, processToken, getImage, transferToken } from './api';
 import { Link } from 'react-router-dom';
 import {  } from './api';
 import './Homepage.css';
@@ -8,6 +8,7 @@ import { mintingOperation } from "../components/Minter"
 
 
 import ImageUploading from "react-images-uploading";
+import { transferOperation } from '../utils/operation';
 
 
 const rootElement = document.getElementById("root");
@@ -189,15 +190,14 @@ const TransferPopup = ({ onClose }) => {
   };
 
   // Function to handle form submission
-  const handleSubmit = (event) => {
-    event.preventDefault();
-
-    // Perform the transfer logic here, e.g., call an API endpoint
-    // with the destination and token ID values
-
-    // Reset the form fields
-    setDestination('');
-    setTokenID('');
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    try {
+      const response =  transferToken(destination, tokenID); // Replace with your API endpoint to handle minting
+      console.log(response.data); // Handle the response as needed
+    } catch (error) {
+      console.log('Error occurred: ' + error.message);
+    }
   };
 
   return (
@@ -531,10 +531,9 @@ const Homepage = () => {
         </button>
         
       </div>
-
-      <div className="tab-bar">
-      <h1 className="tab-title" style={{ fontFamily: 'Montserrat' }}>LOTNFT</h1>
-      </div>
+      <button onClick={onConnectWallet} className="btn btn-outline-info">
+        {account ? account : "Connect Wallet"}
+        </button>
 
       <div className="land-lots-container">
         {ownedTokens.map((landLot) => (
